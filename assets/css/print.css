@@ -1,0 +1,93 @@
+/* ============================================================================
+   Print stylesheet for printable report pages
+   ========================================================================== */
+
+body {
+    font-family: "Segoe UI", system-ui, Arial, sans-serif;
+    color: #111;
+    background: #fff;
+    margin: 0;
+    padding: 1rem;
+}
+
+.print-toolbar {
+    margin-bottom: 1rem;
+}
+
+.print-body h2 {
+    margin-top: 0;
+    margin-bottom: .25rem;
+}
+
+.print-meta {
+    color: #555;
+    font-size: .9rem;
+    margin-bottom: 1rem;
+}
+
+.print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .8rem;
+}
+
+.print-table th,
+.print-table td {
+    border: 1px solid #cbd5e1;
+    padding: .35rem .5rem;
+    text-align: left;
+}
+
+.print-table th {
+    background: #f1f5f9;
+    font-weight: 600;
+}
+
+.print-table td.status-working       { color: #15803d; font-weight: 600; }
+.print-table td.status-faulty        { color: #b91c1c; font-weight: 600; }
+.print-table td.status-maintenance   { color: #b45309; font-weight: 600; }
+.print-table td.status-out           { color: #64748b; font-weight: 600; }
+.print-table td.status-scrapped      { color: #1e293b; font-weight: 600; }
+
+/* Detail view definition rows */
+.print-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: .75rem;
+}
+
+.print-detail-table th,
+.print-detail-table td {
+    border: 1px solid #e2e8f0;
+    padding: .4rem .6rem;
+    font-size: .85rem;
+}
+
+.print-detail-table th {
+    background: #f8fafc;
+    width: 25%;
+    font-weight: 600;
+}
+
+.print-section-title {
+    font-size: .95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-bottom: 2px solid #334155;
+    padding-bottom: .25rem;
+    margin: 1.25rem 0 .6rem;
+}
+
+/* Everything marked .no-print is hidden when printing */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        padding: 0;
+    }
+    @page {
+        margin: 12mm;
+        size: auto;
+    }
+}
