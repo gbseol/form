@@ -64,17 +64,7 @@ function xlsx_col_name($n)
  */
 function xlsx_col_widths(array $columns)
 {
-    $map = [
-        'S No' => 6, 'Ticket ID' => 10, 'Created By' => 14, 'Issue Date' => 12,
-        'Issue Time' => 10, 'Lab' => 12, 'PC Number' => 12, 'Issue' => 40,
-        'Fixed By' => 14, 'Fix Date' => 12, 'Fix Time' => 10, 'Solution' => 40,
-        'Status' => 12, 'Computer ID' => 12, 'Description' => 40, 'Remarks' => 30,
-    ];
-    $widths = [];
-    foreach ($columns as $col) {
-        $widths[] = $map[$col] ?? 14;
-    }
-    return $widths;
+    return report_col_widths($columns);
 }
 
 // -----------------------------------------------------------------------------

@@ -17,7 +17,9 @@ require_can('view_issues');
 $id = (int)($_GET['id'] ?? 0);
 
 $stmt = db()->prepare(
-    "SELECT i.*, c.computer_id, c.status AS computer_status, l.name AS lab_name,
+    "SELECT i.*, c.computer_id, c.id AS computer_row_id, c.status AS computer_status, l.name AS lab_name,
+            c.cpu, c.ram, c.storage_type, c.storage_capacity,
+            c.monitor_condition, c.keyboard_condition, c.mouse_condition, c.cpu_condition,
             u.username AS reporter_username,
             f.username AS fixer_username
        FROM issues i
@@ -48,9 +50,25 @@ require_once __DIR__ . '/../includes/header.php';
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h4 class="mb-0"><i class="bi bi-bug me-2"></i>Issue #<?php echo (int)$issue['id']; ?> <?php echo issue_status_badge($issue['status']); ?></h4>
-    <a href="<?php echo base_url('issues/index.php'); ?>" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left me-1"></i>Back to issues
-    </a>
+    <div class="d-flex gap-2">
+        <?php if (can_edit_issue($issue)): ?>
+            <a href="<?php echo issue_edit_url($issue); ?>" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-pencil me-1"></i>Edit
+            </a>
+        <?php endif; ?>
+        <?php if (can_close_issue($issue)): ?>
+            <form method="post" action="<?php echo base_url('issues/close.php'); ?>" class="d-inline" data-confirm="Close issue #<?php echo (int)$issue['id']; ?>?">
+                <?php echo csrf_field(); ?>
+                <input type="hidden" name="id" value="<?php echo (int)$issue['id']; ?>">
+                <button type="submit" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-check-circle me-1"></i>Close Issue
+                </button>
+            </form>
+        <?php endif; ?>
+        <a href="<?php echo base_url('issues/index.php'); ?>" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Back to issues
+        </a>
+    </div>
 </div>
 
 <div class="row g-3">
@@ -64,8 +82,8 @@ require_once __DIR__ . '/../includes/header.php';
                         <tr>
                             <th class="text-muted" style="width: 35%;">Computer</th>
                             <td>
-                                <?php if ($issue['computer_id']): ?>
-                                    <a href="<?php echo base_url('computers/view.php?id=' . (int)$issue['computer_id']); ?>">
+                                <?php if ($issue['computer_row_id']): ?>
+                                    <a href="<?php echo base_url('computers/view.php?id=' . (int)$issue['computer_row_id']); ?>">
                                         <?php echo e($issue['computer_id']); ?>
                                     </a>
                                     <span class="text-muted">— <?php echo e($issue['lab_name'] ?: 'No lab'); ?></span>
@@ -106,6 +124,58 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
         </div>
+
+        <?php if ($issue['computer_row_id']): ?>
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-pc-display me-1"></i>Reported Computer Condition</div>
+            <div class="card-body">
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3">
+                        <div class="border rounded p-2 text-center h-100">
+                            <div class="text-muted small mb-1">Monitor</div>
+                            <?php echo status_badge($issue['monitor_condition'] ?? ''); ?>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="border rounded p-2 text-center h-100">
+                            <div class="text-muted small mb-1">Keyboard</div>
+                            <?php echo status_badge($issue['keyboard_condition'] ?? ''); ?>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="border rounded p-2 text-center h-100">
+                            <div class="text-muted small mb-1">Mouse</div>
+                            <?php echo status_badge($issue['mouse_condition'] ?? ''); ?>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="border rounded p-2 text-center h-100">
+                            <div class="text-muted small mb-1">CPU</div>
+                            <?php echo status_badge($issue['cpu_condition'] ?? ''); ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="text-muted small">Processor</div>
+                        <div><?php echo $issue['cpu'] ?: '—'; ?></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted small">RAM</div>
+                        <div><?php echo $issue['ram'] ?: '—'; ?></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted small">Storage</div>
+                        <div><?php echo $issue['storage_capacity'] ?: '—'; ?></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted small">Storage Type</div>
+                        <div><?php echo $issue['storage_type'] ?: '—'; ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 
     <?php if ($isManager): ?>

@@ -73,6 +73,9 @@ $statusSelect  = function ($field, $default) use ($v, $statusOptions) {
 
 <form method="post" action="" enctype="multipart/form-data" autocomplete="off" id="computerForm">
     <?php echo csrf_field(); ?>
+    <?php if ($reportOnly && !empty($linkedIssueId)): ?>
+        <input type="hidden" name="issue_id" value="<?php echo (int)$linkedIssueId; ?>">
+    <?php endif; ?>
 
     <!-- ==================== ROOM & COMPUTER ID ==================== -->
     <div class="card mb-3">
@@ -225,8 +228,9 @@ $statusSelect  = function ($field, $default) use ($v, $statusOptions) {
         </div>
     </div>
 
-    <!-- ==================== REPORT AN ISSUE (edit mode only) ==================== -->
-    <?php if ($isEdit || $reportOnly): ?>
+    <!-- ==================== REPORT AN ISSUE (edit mode only) ====================
+         Hidden while fixing an existing issue (the issue is resolved on save). -->
+    <?php if (($isEdit || $reportOnly) && empty($linkedIssueId)): ?>
     <div class="card mb-3" id="issueReportCard">
         <div class="card-header"><i class="bi bi-bug me-1"></i> Report an Issue <small class="text-muted">(optional)</small></div>
         <div class="card-body">
@@ -281,7 +285,7 @@ $statusSelect  = function ($field, $default) use ($v, $statusOptions) {
 
     <div class="d-flex gap-2 mb-4">
         <button type="submit" class="btn btn-primary px-4">
-            <i class="bi bi-check-lg me-1"></i><?php echo $reportOnly ? 'Report Issue' : ($isEdit ? 'Save Changes' : 'Add Computer'); ?>
+            <i class="bi bi-check-lg me-1"></i><?php echo $reportOnly ? (!empty($linkedIssueId) ? 'Save Changes' : 'Report Issue') : ($isEdit ? 'Save Changes' : 'Add Computer'); ?>
         </button>
         <a href="<?php echo base_url('computers/index.php'); ?>" class="btn btn-outline-secondary">Cancel</a>
     </div>

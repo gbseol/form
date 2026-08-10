@@ -161,16 +161,56 @@ function activity_report_columns()
 }
 
 /**
+ * Column widths (Excel character units) shared by the Excel export and the
+ * printable page so that both outputs line up the same way.
+ *
+ * @param array $columns
+ * @return array
+ */
+function report_col_widths(array $columns)
+{
+    $map = [
+        'Ticket ID' => 10, 'Created By' => 14, 'Issue Date' => 12,
+        'Issue Time' => 10, 'Lab' => 12, 'PC Number' => 12, 'Issue' => 40,
+        'Fixed By' => 14, 'Fix Date' => 12, 'Fix Time' => 10, 'Solution' => 40,
+        'Status' => 12, 'Computer ID' => 12, 'Description' => 40, 'Remarks' => 30,
+        'Monitor' => 14, 'Keyboard' => 14, 'Mouse' => 14, 'CPU' => 14,
+    ];
+    $widths = [];
+    foreach ($columns as $col) {
+        $widths[] = $map[$col] ?? 14;
+    }
+    return $widths;
+}
+
+/**
+ * Which issues export mode was requested. "summary" drops the individual part
+ * condition columns (Monitor / Keyboard / Mouse / CPU), "detailed" keeps them.
+ * The mode is passed as ?mode=summary or ?mode=detailed on the export links.
+ *
+ * @return string
+ */
+function issue_export_mode()
+{
+    return ($_GET['mode'] ?? '') === 'summary' ? 'summary' : 'detailed';
+}
+
+/**
  * Columns for the issues history report / export.
  *
  * @return array
  */
 function issues_report_columns()
 {
-    return [
-        'S No', 'Ticket ID', 'Created By', 'Issue Date', 'Issue Time', 'Lab', 'PC Number',
-        'Issue', 'Fixed By', 'Fix Date', 'Fix Time', 'Solution', 'Status',
+    $columns = [
+        'Ticket ID', 'Created By', 'Issue Date', 'Issue Time', 'Lab', 'PC Number',
+        'Monitor', 'Keyboard', 'Mouse', 'CPU', 'Issue', 'Fixed By', 'Fix Date', 'Fix Time',
+        'Solution', 'Status',
     ];
+    if (issue_export_mode() === 'summary') {
+        $columns = array_values(array_diff($columns, ['Monitor', 'Keyboard', 'Mouse', 'CPU']));
+    }
+    return $columns;
 }
 
 /**
@@ -197,6 +237,7 @@ function issues_report()
         "SELECT i.id, i.issue_category, i.description, i.status,
                 i.fixed_at, i.fix_notes, i.created_at,
                 c.computer_id,
+                c.monitor_condition, c.keyboard_condition, c.mouse_condition, c.cpu_condition,
                 l.name AS lab_name,
                 u.username AS reporter_username,
                 f.username AS fixer_username
@@ -212,16 +253,18 @@ function issues_report()
     $stmt->execute($params);
 
     $rows = [];
-    $serial = 1;
     while ($row = $stmt->fetch()) {
-        $rows[] = [
-            'S No'        => $serial++,
+        $item = [
             'Ticket ID'   => $row['id'],
             'Created By'  => $row['reporter_username'] ?? '',
             'Issue Date'  => $row['created_at'] ? date('Y-m-d', strtotime($row['created_at'])) : '',
             'Issue Time'  => $row['created_at'] ? date('H:i:s', strtotime($row['created_at'])) : '',
             'Lab'         => $row['lab_name'] ?? '',
             'PC Number'   => $row['computer_id'] ?? '',
+            'Monitor'     => $row['monitor_condition'] ?? '',
+            'Keyboard'    => $row['keyboard_condition'] ?? '',
+            'Mouse'       => $row['mouse_condition'] ?? '',
+            'CPU'         => $row['cpu_condition'] ?? '',
             'Issue'       => $row['description'],
             'Fixed By'    => $row['fixer_username'] ?? '',
             'Fix Date'    => $row['fixed_at'] ? date('Y-m-d', strtotime($row['fixed_at'])) : '',
@@ -229,6 +272,10 @@ function issues_report()
             'Solution'    => $row['fix_notes'] ?? '',
             'Status'      => ucfirst(str_replace('_', ' ', $row['status'])),
         ];
+        if (issue_export_mode() === 'summary') {
+            unset($item['Monitor'], $item['Keyboard'], $item['Mouse'], $item['CPU']);
+        }
+        $rows[] = $item;
     }
     return $rows;
 }

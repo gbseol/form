@@ -19,6 +19,18 @@ body {
     margin-bottom: .25rem;
 }
 
+/* Excel-style title bar (dark teal, white bold text) */
+.report-title {
+    background: #008080;
+    color: #ffffff;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: .7rem;
+    margin: 0 0 .5rem;
+    border-radius: .25rem;
+}
+
 .print-meta {
     color: #555;
     font-size: .9rem;
@@ -27,27 +39,78 @@ body {
 
 .print-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     font-size: .8rem;
 }
 
 .print-table th,
 .print-table td {
-    border: 1px solid #cbd5e1;
-    padding: .35rem .5rem;
+    border: 1px solid #000000;
+    padding: .4rem .5rem;
     text-align: left;
+    word-wrap: break-word;
 }
 
+/* Excel-style header row (gray, white bold centered text) */
 .print-table th {
-    background: #f1f5f9;
-    font-weight: 600;
+    background: #808080;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: center;
+    font-size: .82rem;
+    letter-spacing: .02em;
 }
 
-.print-table td.status-working       { color: #15803d; font-weight: 600; }
-.print-table td.status-faulty        { color: #b91c1c; font-weight: 600; }
-.print-table td.status-maintenance   { color: #b45309; font-weight: 600; }
-.print-table td.status-out           { color: #64748b; font-weight: 600; }
-.print-table td.status-scrapped      { color: #1e293b; font-weight: 600; }
+/* Zebra striping for readability */
+.print-table tbody tr:nth-child(even) {
+    background: #f3f6fa;
+}
+
+/* Status badges (filled, matching the app colours) */
+.print-table td.status-working,
+.print-table td.status-resolved {
+    background: #16a34a;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: center;
+}
+
+.print-table td.status-faulty {
+    background: #dc2626;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: center;
+}
+
+.print-table td.status-maintenance,
+.print-table td.status-in-progress {
+    background: #d97706;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: center;
+}
+
+.print-table td.status-open {
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: center;
+}
+
+.print-table td.status-out {
+    background: #64748b;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: center;
+}
+
+.print-table td.status-scrapped {
+    background: #1e293b;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: center;
+}
 
 /* Detail view definition rows */
 .print-detail-table {

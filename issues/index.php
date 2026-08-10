@@ -44,7 +44,7 @@ $stmt->execute($params);
 $total = (int)$stmt->fetchColumn();
 
 $stmt = db()->prepare(
-    "SELECT i.*, c.computer_id, l.name AS lab_name,
+    "SELECT i.*, c.computer_id, c.id AS computer_row_id, l.name AS lab_name,
             u.username AS reporter_username
      $fromSql
      ORDER BY FIELD(i.status, 'open', 'in_progress', 'resolved'), i.created_at DESC
@@ -63,12 +63,26 @@ require_once __DIR__ . '/../includes/header.php';
         </span>
         <div class="d-flex gap-2 align-items-center flex-wrap">
             <?php if ($isManager): ?>
-                <a href="<?php echo base_url('reports/export_excel.php?type=issues' . ($fStatus !== '' ? '&status=' . urlencode($fStatus) : '')); ?>" class="btn btn-sm btn-success">
-                    <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
-                </a>
-                <a href="<?php echo base_url('reports/export_pdf.php?type=issues' . ($fStatus !== '' ? '&status=' . urlencode($fStatus) : '')); ?>" class="btn btn-sm btn-danger">
-                    <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
-                </a>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">Choose summary type</h6></li>
+                        <li><a class="dropdown-item" href="<?php echo base_url('reports/export_excel.php?type=issues&mode=summary' . ($fStatus !== '' ? '&status=' . urlencode($fStatus) : '')); ?>">Normal Summary</a></li>
+                        <li><a class="dropdown-item" href="<?php echo base_url('reports/export_excel.php?type=issues&mode=detailed' . ($fStatus !== '' ? '&status=' . urlencode($fStatus) : '')); ?>">Detailed Summary</a></li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">Choose summary type</h6></li>
+                        <li><a class="dropdown-item" href="<?php echo base_url('reports/print.php?type=issues&mode=summary' . ($fStatus !== '' ? '&status=' . urlencode($fStatus) : '')); ?>">Normal Summary</a></li>
+                        <li><a class="dropdown-item" href="<?php echo base_url('reports/print.php?type=issues&mode=detailed' . ($fStatus !== '' ? '&status=' . urlencode($fStatus) : '')); ?>">Detailed Summary</a></li>
+                    </ul>
+                </div>
             <?php endif; ?>
             <form method="get" action="" class="d-flex gap-2 align-items-center">
                 <select class="form-select form-select-sm" name="status" onchange="this.form.submit()">
@@ -113,8 +127,8 @@ require_once __DIR__ . '/../includes/header.php';
                 <tr>
                     <td data-label="#" class="fw-semibold">#<?php echo (int)$issue['id']; ?></td>
                     <td data-label="Computer">
-                        <?php if ($issue['computer_id']): ?>
-                            <a href="<?php echo base_url('computers/view.php?id=' . (int)$issue['computer_id']); ?>" class="fw-semibold"><?php echo e($issue['computer_id']); ?></a>
+                        <?php if ($issue['computer_row_id']): ?>
+                            <a href="<?php echo base_url('computers/view.php?id=' . (int)$issue['computer_row_id']); ?>" class="fw-semibold"><?php echo e($issue['computer_id']); ?></a>
                             <div class="small text-muted"><?php echo e($issue['lab_name'] ?: '—'); ?></div>
                         <?php else: ?>
                             <span class="text-muted">—</span>
@@ -131,6 +145,20 @@ require_once __DIR__ . '/../includes/header.php';
                         <a href="<?php echo base_url('issues/view.php?id=' . (int)$issue['id']); ?>" class="btn btn-sm btn-outline-secondary" title="View issue">
                             <i class="bi bi-eye"></i>
                         </a>
+                        <?php if (can_edit_issue($issue)): ?>
+                            <a href="<?php echo issue_edit_url($issue); ?>" class="btn btn-sm btn-outline-primary" title="Edit issue">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        <?php endif; ?>
+                        <?php if (can_close_issue($issue)): ?>
+                            <form method="post" action="<?php echo base_url('issues/close.php'); ?>" class="d-inline" data-confirm="Close issue #<?php echo (int)$issue['id']; ?>?">
+                                <?php echo csrf_field(); ?>
+                                <input type="hidden" name="id" value="<?php echo (int)$issue['id']; ?>">
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="Close issue">
+                                    <i class="bi bi-check-circle"></i>
+                                </button>
+                            </form>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>

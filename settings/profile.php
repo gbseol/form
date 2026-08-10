@@ -35,10 +35,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ------------------------------------------------------------------
     // Action: update name / email (+ optionally upload a new photo)
     // ------------------------------------------------------------------
+    $username = trim($_POST['username'] ?? '');
     $fullName = trim($_POST['full_name'] ?? '');
     $email    = trim($_POST['email'] ?? '');
 
     $errors = [];
+    if ($username === '' || !preg_match('/^[A-Za-z0-9_.-]{3,50}$/', $username)) {
+        $errors[] = 'Username must be 3-50 characters (letters, numbers, dot, dash or underscore).';
+    } else {
+        $check = db()->prepare("SELECT id FROM users WHERE username = ? AND id != ?");
+        $check->execute([$username, (int)$user['id']]);
+        if ($check->fetch()) {
+            $errors[] = 'This username is already taken.';
+        }
+    }
     if ($fullName === '') {
         $errors[] = 'Full name is required.';
     }
@@ -67,10 +77,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $photoToStore = $photoFile ?: ($user['profile_photo'] ?? null);
 
-        $stmt = db()->prepare("UPDATE users SET full_name = ?, email = ?, profile_photo = ? WHERE id = ?");
-        $stmt->execute([$fullName, $email ?: null, $photoToStore, (int)$user['id']]);
+        $stmt = db()->prepare("UPDATE users SET username = ?, full_name = ?, email = ?, profile_photo = ? WHERE id = ?");
+        $stmt->execute([$username, $fullName, $email ?: null, $photoToStore, (int)$user['id']]);
 
         // Refresh the session copy.
+        $_SESSION['user']['username']      = $username;
         $_SESSION['user']['full_name']     = $fullName;
         $_SESSION['user']['email']         = $email;
         $_SESSION['user']['profile_photo'] = $photoToStore;
@@ -113,8 +124,9 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input type="text" class="form-control" value="<?php echo e($user['username']); ?>" disabled>
+                <label class="form-label">Username <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="username" value="<?php echo e($user['username']); ?>" required maxlength="50">
+                <div class="form-text">Letters, numbers, dot, dash or underscore. 3-50 characters.</div>
             </div>
 
             <div class="mb-3">

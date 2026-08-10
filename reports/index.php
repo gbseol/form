@@ -125,8 +125,22 @@ require_once __DIR__ . '/../includes/header.php';
                 <h5><i class="bi bi-journal-check me-1 text-success"></i>Issues History</h5>
                 <p class="text-muted">Every reported issue: date &amp; time, lab, computer, reporter, current status and solved by.</p>
                 <a href="<?php echo base_url('issues/index.php'); ?>" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye me-1"></i>View</a>
-                <a href="<?php echo $base; ?>export_excel.php?type=issues" class="btn btn-sm btn-success"><i class="bi bi-file-earmark-excel me-1"></i>Export Excel</a>
-                <a href="<?php echo $base; ?>export_pdf.php?type=issues" class="btn btn-sm btn-danger"><i class="bi bi-file-earmark-pdf me-1"></i>Export PDF</a>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-file-earmark-excel me-1"></i>Export Excel</button>
+                    <ul class="dropdown-menu">
+                        <li><h6 class="dropdown-header">Choose summary type</h6></li>
+                        <li><a class="dropdown-item" href="<?php echo $base; ?>export_excel.php?type=issues&mode=summary">Normal Summary</a></li>
+                        <li><a class="dropdown-item" href="<?php echo $base; ?>export_excel.php?type=issues&mode=detailed">Detailed Summary</a></li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-file-earmark-pdf me-1"></i>Export PDF</button>
+                    <ul class="dropdown-menu">
+                        <li><h6 class="dropdown-header">Choose summary type</h6></li>
+                        <li><a class="dropdown-item" href="<?php echo $base; ?>print.php?type=issues&mode=summary" target="_blank">Normal Summary</a></li>
+                        <li><a class="dropdown-item" href="<?php echo $base; ?>print.php?type=issues&mode=detailed" target="_blank">Detailed Summary</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

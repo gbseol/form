@@ -40,6 +40,22 @@ if (!$existing) {
 
 $labs = db()->query("SELECT id, name FROM labs ORDER BY name")->fetchAll();
 
+// When a staff member opened this page from an issue (pencil icon), remember
+// which issue is being fixed. Saving as Working then resolves it, and a
+// duplicate issue is never created while fixing an existing one.
+$linkedIssueId = (int)($_GET['issue'] ?? $_POST['issue_id'] ?? 0);
+if ($linkedIssueId > 0) {
+    $stmt = db()->prepare("SELECT id FROM issues WHERE id = ? AND computer_id = ?");
+    $stmt->execute([$linkedIssueId, $id]);
+    if (!$stmt->fetch()) {
+        $linkedIssueId = 0;
+    }
+}
+
+if ($reportOnly && $linkedIssueId) {
+    $page_title = 'Fix Issue #' . $linkedIssueId;
+}
+
 $v = $existing;
 $errors = [];
 
@@ -88,10 +104,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // The problem description is optional - an issue is created when
             // the staff member wrote something, or automatically when the
             // computer's status is not "Working" (so reporting a problem always
-            // creates an issue the admins can see and fix).
+            // creates an issue the admins can see and fix). Fixing an existing
+            // issue never creates a new one.
             $issueDescription = trim((string)($_POST['issue_description'] ?? ''));
             $autoIssue        = $reportOnly && $update['status'] !== 'Working';
-            if ($issueDescription !== '' || $autoIssue) {
+            if (!$linkedIssueId && ($issueDescription !== '' || $autoIssue)) {
                 $category = in_array($_POST['issue_category'] ?? '', issue_categories(), true)
                     ? $_POST['issue_category']
                     : 'Other';
@@ -105,6 +122,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 set_flash('success', 'Issue #' . $issueId . ' has been reported for this computer. An administrator will fix it.');
             } else {
                 set_flash('success', 'Computer "' . $existing['computer_id'] . '" condition was updated.');
+            }
+
+            // The computer was returned to a fully Working state: automatically
+            // resolve the open issues the current user reported for it.
+            if ($update['status'] === 'Working') {
+                $stmt = db()->prepare(
+                    "SELECT id FROM issues
+                      WHERE computer_id = ? AND reported_by = ? AND status <> 'resolved'
+                      ORDER BY id"
+                );
+                $stmt->execute([$id, (int)current_user()['id']]);
+                $openIds = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+
+                if (count($openIds) > 0) {
+                    $placeholders = implode(',', array_fill(0, count($openIds), '?'));
+                    $stmt = db()->prepare(
+                        "UPDATE issues
+                            SET status = 'resolved', fix_notes = '', fixed_by = ?, fixed_at = NOW()
+                          WHERE id IN ($placeholders)"
+                    );
+                    $stmt->execute(array_merge([(int)current_user()['id']], $openIds));
+
+                    foreach ($openIds as $openId) {
+                        log_activity('Issue #' . $openId . ' resolved (computer set to Working)',
+                            'issues', $openId, ['status' => 'open'], ['status' => 'resolved']);
+                    }
+
+                    $label = count($openIds) === 1
+                        ? 'Issue #' . $openIds[0] . ' was resolved.'
+                        : 'Issues #' . implode(', #', $openIds) . ' were resolved.';
+                    set_flash('success', 'Computer "' . $existing['computer_id'] . '" is marked as Working. ' . $label);
+                }
             }
 
             redirect('computers/view.php?id=' . $id);
@@ -166,11 +215,17 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i><?php echo $reportOnly ? 'Report an Issue' : 'Edit Computer'; ?>: <?php echo e($existing['computer_id']); ?></h4>
+    <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i><?php echo $reportOnly ? ($linkedIssueId ? 'Fix Issue #' . $linkedIssueId : 'Report an Issue') : 'Edit Computer'; ?>: <?php echo e($existing['computer_id']); ?></h4>
     <a href="<?php echo base_url('computers/view.php?id=' . $id); ?>" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Back to details
     </a>
 </div>
+
+<?php if ($reportOnly && $linkedIssueId): ?>
+<div class="alert alert-info">
+    <i class="bi bi-info-circle me-1"></i>Set the computer's parts back to Working and save. The open issue you reported will be resolved automatically.
+</div>
+<?php endif; ?>
 
 <?php $isEdit = !$reportOnly; ?>
 <?php include __DIR__ . '/_form.php'; ?>

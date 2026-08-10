@@ -39,7 +39,7 @@ CREATE TABLE `activity_logs` (
   KEY `idx_logs_table_record` (`table_name`,`record_id`),
   KEY `idx_logs_created` (`created_at`),
   CONSTRAINT `fk_logs_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Activity audit log';
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Activity audit log';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -87,7 +87,11 @@ INSERT INTO `activity_logs` VALUES
 (36,2,'ram','Reported issue #2 for computer PC001','issues',2,NULL,'{\"category\":\"Other\",\"description\":\"Computer status set to \\\"Not Working\\\".\"}','127.0.0.1','2026-08-09 14:22:13'),
 (37,1,'admin','Updated issue #2 to \"resolved\"','issues',2,'{\"id\":2,\"computer_id\":1,\"reported_by\":2,\"issue_category\":\"Other\",\"description\":\"Computer status set to \\\"Not Working\\\".\",\"status\":\"open\",\"fixed_by\":null,\"fixed_at\":null,\"fix_notes\":null,\"created_at\":\"2026-08-09 14:22:13\",\"updated_at\":\"2026-08-09 14:22:13\"}','{\"id\":2,\"computer_id\":1,\"reported_by\":2,\"issue_category\":\"Other\",\"description\":\"Computer status set to \\\"Not Working\\\".\",\"status\":\"resolved\",\"fixed_by\":null,\"fixed_at\":null,\"fix_notes\":\"\",\"created_at\":\"2026-08-09 14:22:13\",\"updated_at\":\"2026-08-09 14:22:13\"}','127.0.0.1','2026-08-09 14:23:09'),
 (38,1,'admin','Updated issue #2 to \"resolved\"','issues',2,'{\"id\":2,\"computer_id\":1,\"reported_by\":2,\"issue_category\":\"Other\",\"description\":\"Computer status set to \\\"Not Working\\\".\",\"status\":\"resolved\",\"fixed_by\":1,\"fixed_at\":\"2026-08-09 14:23:09\",\"fix_notes\":\"\",\"created_at\":\"2026-08-09 14:22:13\",\"updated_at\":\"2026-08-09 14:23:09\"}','{\"id\":2,\"computer_id\":1,\"reported_by\":2,\"issue_category\":\"Other\",\"description\":\"Computer status set to \\\"Not Working\\\".\",\"status\":\"resolved\",\"fixed_by\":1,\"fixed_at\":\"2026-08-09 14:23:09\",\"fix_notes\":\"screen issue (replaced)\",\"created_at\":\"2026-08-09 14:22:13\",\"updated_at\":\"2026-08-09 14:23:09\"}','127.0.0.1','2026-08-09 14:44:38'),
-(39,1,'admin','Downloaded database backup','settings',NULL,NULL,NULL,'127.0.0.1','2026-08-09 14:45:29');
+(39,1,'admin','Downloaded database backup','settings',NULL,NULL,NULL,'127.0.0.1','2026-08-09 14:45:29'),
+(40,1,'admin','Logged in','users',1,NULL,NULL,'127.0.0.1','2026-08-09 17:27:13'),
+(41,1,'admin','Logged in','users',1,NULL,NULL,'127.0.0.1','2026-08-09 17:34:18'),
+(42,1,'admin','Updated own profile','users',1,NULL,NULL,'127.0.0.1','2026-08-09 17:37:33'),
+(43,1,'admin','Downloaded database backup','settings',NULL,NULL,NULL,'127.0.0.1','2026-08-09 17:45:46');
 /*!40000 ALTER TABLE `activity_logs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -371,7 +375,7 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-(1,'admin','Administrator','admin@example.com','$2y$10$/hqxYV4wOInNsicpYjQTJ.xs7ncDhxmhQmUjnPQByDN1Fbvq.7xhK','super_admin','active','u1_20260809130246_56bfd07f.gif','light','2026-08-09 13:57:27','2026-08-09 12:48:44','2026-08-09 13:57:27'),
+(1,'admin','Administrator','admin@example.com','$2y$10$/hqxYV4wOInNsicpYjQTJ.xs7ncDhxmhQmUjnPQByDN1Fbvq.7xhK','super_admin','active','u1_20260809130246_56bfd07f.gif','light','2026-08-09 17:34:18','2026-08-09 12:48:44','2026-08-09 17:34:18'),
 (2,'ram','ram singh','crissgill@pinmx.net','$2y$10$pzCoV.a/kM.npoHcGNVqxueKFHJTGsV361TfNWpFnkJI9lYcqyCCS','staff','active',NULL,'dark','2026-08-09 13:45:25','2026-08-09 13:39:34','2026-08-09 13:46:45'),
 (3,'tom','tom boy','tom@gmail.com','$2y$10$Zy8wFHIGrCLLVQ5j8a1HDeb8yRlIXc7uMZG2yWRzqELJg4qMuJTsm','admin','active',NULL,'light',NULL,'2026-08-09 13:42:59','2026-08-09 13:42:59');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
@@ -390,4 +394,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-08-09 14:46:38
+-- Dump completed on 2026-08-09 17:46:43

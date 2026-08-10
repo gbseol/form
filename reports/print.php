@@ -25,6 +25,7 @@ $titles = [
     'maintenance' => 'Has Some Issues PCs',
     'lab'         => 'Lab Report',
     'activity'    => 'User Activity',
+    'issues'      => 'Issues History',
 ];
 $title = $titles[$type] ?? 'Report';
 
@@ -41,7 +42,10 @@ if ($type === 'lab' && !empty($_GET['lab_id'])) {
 $page_title = $title . ' - Print';
 require_once __DIR__ . '/../includes/print_header.php';
 
-if ($type === 'activity') {
+if ($type === 'issues') {
+    $rows    = issues_report();
+    $columns = issues_report_columns();
+} elseif ($type === 'activity') {
     require_can('view_logs');
     $rows    = activity_report();
     $columns = activity_report_columns();
@@ -51,7 +55,7 @@ if ($type === 'activity') {
 }
 ?>
 
-<h2><?php echo e($title); ?></h2>
+<h1 class="report-title"><?php echo e($title); ?></h1>
 <div class="print-meta">
     <strong>Generated:</strong> <?php echo date('d M Y H:i:s'); ?>
     &nbsp;&middot;&nbsp;
@@ -60,11 +64,16 @@ if ($type === 'activity') {
     <strong>Records:</strong> <?php echo count($rows); ?>
 </div>
 
+<?php
+$colWidths  = report_col_widths($columns);
+$totalWidth = array_sum($colWidths) ?: 1;
+?>
+
 <table class="print-table">
     <thead>
         <tr>
-            <?php foreach ($columns as $col): ?>
-                <th><?php echo e($col); ?></th>
+            <?php foreach ($columns as $i => $col): ?>
+                <th style="width: <?php echo round(($colWidths[$i] / $totalWidth) * 100, 2); ?>%;"><?php echo e($col); ?></th>
             <?php endforeach; ?>
         </tr>
     </thead>

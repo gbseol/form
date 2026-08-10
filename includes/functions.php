@@ -549,6 +549,52 @@ function create_issue($computerId, $category, $description, $reporterId)
 }
 
 /**
+ * Whether the current user may edit the given issue. Admins / super admins
+ * can edit any issue; staff members can only edit the issues they reported.
+ *
+ * @param array $issue
+ * @return bool
+ */
+function can_edit_issue($issue)
+{
+    if (can('manage_issues')) {
+        return true;
+    }
+    $user = current_user();
+    return $user !== null && (int)($issue['reported_by'] ?? 0) === (int)$user['id'];
+}
+
+/**
+ * Whether the current user may close (mark resolved) the given issue.
+ * Only issues that are not already resolved can be closed.
+ *
+ * @param array $issue
+ * @return bool
+ */
+function can_close_issue($issue)
+{
+    return can_edit_issue($issue) && ($issue['status'] ?? '') !== 'resolved';
+}
+
+/**
+ * URL used to edit an issue. When the issue is linked to a computer the staff
+ * member is taken back to the same report page where issues are created, so
+ * they can restore the computer's condition and the issue is resolved on save.
+ * Issues without a computer fall back to the standalone edit page.
+ *
+ * @param array $issue
+ * @return string
+ */
+function issue_edit_url($issue)
+{
+    $id = (int)$issue['id'];
+    if (!empty($issue['computer_row_id'])) {
+        return base_url('computers/edit.php?id=' . (int)$issue['computer_row_id'] . '&report=1&issue=' . $id);
+    }
+    return base_url('issues/edit.php?id=' . $id);
+}
+
+/**
  * Number of open (not resolved) issues. Used for the sidebar badge.
  * Staff members only see the count of issues they reported themselves;
  * admins / super admins see the overall count.
