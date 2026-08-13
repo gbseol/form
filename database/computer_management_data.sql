@@ -340,9 +340,9 @@ CREATE TABLE `settings` (
 LOCK TABLES `settings` WRITE;
 /*!40000 ALTER TABLE `settings` DISABLE KEYS */;
 INSERT INTO `settings` VALUES
-(1,'site_name','Computer Lab Management System'),
+(1,'site_name','Lab Management'),
 (2,'logo',''),
-(3,'theme_color','#0d6efd');
+(3,'theme_color','#2948c2');
 /*!40000 ALTER TABLE `settings` ENABLE KEYS */;
 UNLOCK TABLES;
 

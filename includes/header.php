@@ -15,7 +15,7 @@ require_once __DIR__ . '/auth.php';
 require_login();
 
 $current_user = current_user();
-$site_name    = get_setting('site_name', 'Computer Lab Management System');
+$site_name    = get_setting('site_name', 'Lab Management');
 $logo_file    = get_setting('logo', '');
 $theme_color  = get_setting('theme_color', '#0d6efd');
 
@@ -52,25 +52,36 @@ function nav_active($dir, $script = '')
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Chart.js for dashboard charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <!-- Custom styles -->
     <link href="<?php echo asset_url('css/style.css'); ?>?v=<?php echo APP_VERSION; ?>" rel="stylesheet">
 
     <style>
-        /* Theme colour injected from the Settings page */
+        /* Theme colour injected from the Settings page.
+           --primary is used for fills/borders; --primary-ink is a lighter
+           variant for text so dark mode (deep red) stays readable. */
         :root {
             --primary: <?php echo e($theme_color); ?>;
+            --primary-ink: var(--primary);
+        }
+        html.dark-mode {
+            --primary: #2948c2;
+            --primary-ink: color-mix(in srgb, #2948c2 45%, #fff);
         }
         .btn-primary, .btn-outline-primary { --bs-btn-border-color: var(--primary); }
         .btn-primary { --bs-btn-bg: var(--primary); --bs-btn-hover-bg: color-mix(in srgb, var(--primary) 85%, #000); --bs-btn-active-bg: var(--primary); --bs-btn-disabled-bg: var(--primary); }
-        .btn-outline-primary { --bs-btn-color: var(--primary); --bs-btn-hover-bg: var(--primary); --bs-btn-hover-border-color: var(--primary); }
-        .text-primary, .link-primary { color: var(--primary) !important; }
+        .btn-outline-primary { --bs-btn-color: var(--primary-ink); --bs-btn-hover-bg: var(--primary); --bs-btn-hover-color: #fff; --bs-btn-hover-border-color: var(--primary); --bs-btn-border-color: color-mix(in srgb, var(--primary) 72%, var(--primary-ink)); }
+        .text-primary, .link-primary { color: var(--primary-ink) !important; }
         .bg-primary { background-color: var(--primary) !important; }
         .border-primary { border-color: var(--primary) !important; }
         .page-item.active .page-link { background-color: var(--primary); border-color: var(--primary); }
         .form-check-input:checked, .form-select:focus, .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--primary) 25%, transparent); }
-        a { color: var(--primary); }
+        a { color: var(--primary-ink); }
     </style>
 
     <script>

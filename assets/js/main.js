@@ -210,14 +210,39 @@
     // ------------------------------------------------------------------------
     const themeToggle = document.getElementById('themeToggle');
 
+    // Dashboard chart instances, rebuilt when the theme changes.
+    let dashCharts = [];
+
+    function applyChartTheme() {
+        const dark = document.documentElement.classList.contains('dark-mode');
+        const color = dark ? '#a49f9d' : '#4f5d7a';
+        const grid  = dark ? 'rgba(164,159,157,.18)' : 'rgba(17,24,53,.10)';
+        if (window.Chart) {
+            Chart.defaults.color = color;
+            Chart.defaults.borderColor = grid;
+        }
+        dashCharts.forEach(function (chart) {
+            if (chart.options.scales) {
+                Object.values(chart.options.scales).forEach(function (scale) {
+                    if (scale.ticks) scale.ticks.color = color;
+                    if (scale.grid) scale.grid.color = grid;
+                });
+            }
+            chart.update();
+        });
+    }
+
     if (themeToggle) {
         themeToggle.addEventListener('click', function () {
             const root = document.documentElement;
             const isDark = root.classList.contains('dark-mode');
             const theme = isDark ? 'light' : 'dark';
 
+            root.classList.add('theme-anim');
             root.classList.toggle('dark-mode', !isDark);
             root.setAttribute('data-bs-theme', theme);
+
+            window.setTimeout(function () { root.classList.remove('theme-anim'); }, 450);
 
             try {
                 localStorage.setItem('clms_theme', theme);
@@ -237,6 +262,8 @@
                 // The local change still applies; the server sync will retry
                 // the next time the user toggles.
             });
+
+            applyChartTheme();
         });
     }
 
@@ -345,10 +372,19 @@
     function renderDashboardCharts(data) {
         const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#0d6efd';
 
+        // Apply theme-aware defaults before the charts are created.
+        applyChartTheme();
+
+        function makeChart(canvas, config) {
+            const chart = new Chart(canvas, config);
+            dashCharts.push(chart);
+            return chart;
+        }
+
         // 1. Computers per Lab (bar)
         const labCanvas = document.getElementById('chartLabs');
         if (labCanvas && Array.isArray(data.labs)) {
-            new Chart(labCanvas, {
+            makeChart(labCanvas, {
                 type: 'bar',
                 data: {
                     labels: data.labs.map(function (l) { return l.name; }),
@@ -372,7 +408,7 @@
         // 2. Working vs Faulty (doughnut)
         const statusCanvas = document.getElementById('chartStatus');
         if (statusCanvas && Array.isArray(data.status)) {
-            new Chart(statusCanvas, {
+            makeChart(statusCanvas, {
                 type: 'doughnut',
                 data: {
                     labels: data.status.map(function (s) { return s.status; }),
@@ -409,7 +445,7 @@
                 : [{ label: 'Solved Issues', total: 1 }];
             const colors = hasIssues ? ['#f59e0b', '#22c55e'] : ['#22c55e'];
 
-            new Chart(issuesCanvas, {
+            makeChart(issuesCanvas, {
                 type: 'doughnut',
                 data: {
                     labels: slices.map(function (s) { return s.label; }),
@@ -439,7 +475,7 @@
         // 3. Monthly updates (line)
         const monthlyCanvas = document.getElementById('chartMonthly');
         if (monthlyCanvas && Array.isArray(data.monthly)) {
-            new Chart(monthlyCanvas, {
+            makeChart(monthlyCanvas, {
                 type: 'line',
                 data: {
                     labels: data.monthly.map(function (m) { return m.label; }),

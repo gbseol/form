@@ -56,7 +56,7 @@ if ($showRecentActivities) {
 }
 ?>
 
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-4<?php echo $isStaff ? ' justify-content-center' : ''; ?>">
     <?php if (!$isStaff): ?>
     <div class="col-6 col-md-4 col-xl-3">
         <div class="card stat-card bg-card-blue">
@@ -117,7 +117,7 @@ if ($showRecentActivities) {
     </div>
     <?php endif; ?>
     <?php if ($isStaff): ?>
-    <div class="col-6 col-md-4 col-xl-3">
+    <div class="col-6 col-md-5 col-xl-4">
         <div class="card stat-card bg-card-purple h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <i class="bi bi-exclamation-circle stat-icon"></i>
@@ -128,7 +128,7 @@ if ($showRecentActivities) {
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-4 col-xl-3">
+    <div class="col-6 col-md-5 col-xl-4">
         <div class="card stat-card bg-card-green h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <i class="bi bi-check2-circle stat-icon"></i>
@@ -205,7 +205,9 @@ if ($showRecentActivities) {
         <div class="card h-100">
             <div class="card-header">Issues</div>
             <div class="card-body">
-                <canvas id="chartIssues" height="110"></canvas>
+                <div class="donut-wrap">
+                    <canvas id="chartIssues" height="110"></canvas>
+                </div>
             </div>
         </div>
     </div>

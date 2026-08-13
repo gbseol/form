@@ -12,7 +12,7 @@
         </main>
 
         <footer class="app-footer">
-            &copy; <?php echo date('Y'); ?> <?php echo e(get_setting('site_name', 'Computer Lab Management System')); ?> &mdash; Computer Lab Management System
+            &copy; <?php echo date('Y'); ?> <?php echo e(get_setting('site_name', 'Lab Management')); ?>
         </footer>
     </div><!-- /.app-main -->
 </div><!-- /.app-wrapper -->

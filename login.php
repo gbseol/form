@@ -107,6 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="icon" type="image/png" href="<?php echo asset_url('images/favicon.png'); ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="<?php echo asset_url('css/style.css'); ?>?v=<?php echo APP_VERSION; ?>" rel="stylesheet">
     <style>
         .login-brand {
@@ -137,8 +140,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         })();
     </script>
 </head>
-<body>
+<body class="app-body">
 <div class="login-page">
+    <div class="login-blob login-blob-1"></div>
+    <div class="login-blob login-blob-2"></div>
+    <div class="login-grid"></div>
     <div class="card login-card">
         <div class="card-body p-4 p-md-5">
             <div class="login-brand">

@@ -1,5 +1,5 @@
 -- =============================================================================
--- Computer Lab Management System - MySQL Database
+-- Lab Management System - MySQL Database
 -- -----------------------------------------------------------------------------
 -- Host: any MySQL 5.7+ / 8.0 database (compatible with InfinityFree)
 -- Import this file using phpMyAdmin (Import tab) or the MySQL client.
@@ -259,9 +259,9 @@ INSERT INTO `labs` (`name`, `location`, `description`, `status`) VALUES
 
 -- Default site settings
 INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES
-('site_name', 'Computer Lab Management System'),
+('site_name', 'Lab Management'),
 ('logo', ''),
-('theme_color', '#0d6efd');
+('theme_color', '#2948c2');
 
 -- =============================================================================
 -- END OF FILE

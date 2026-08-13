@@ -732,7 +732,7 @@ function generate_sql_dump()
     $pdo   = db();
     $lines = [];
 
-    $lines[] = "-- Computer Lab Management System - Database Backup";
+    $lines[] = "-- Lab Management System - Database Backup";
     $lines[] = "-- Generated: " . date('Y-m-d H:i:s');
     $lines[] = "-- Host: " . DB_HOST;
     $lines[] = "-- Database: " . DB_NAME;

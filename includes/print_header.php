@@ -11,7 +11,7 @@
 require_once __DIR__ . '/auth.php';
 require_login();
 
-$site_name = get_setting('site_name', 'Computer Lab Management System');
+$site_name = get_setting('site_name', 'Lab Management');
 ?>
 <!DOCTYPE html>
 <html lang="en">
