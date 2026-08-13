@@ -912,6 +912,9 @@ code {
         white-space: nowrap;
         transition: max-width .34s cubic-bezier(.22, 1, .36, 1), opacity .22s ease;
     }
+    .app-sidebar .sidebar-nav .nav-link .badge {
+        display: none;
+    }
     .app-sidebar .sidebar-section-title {
         display: none;
         padding: 0;
@@ -940,6 +943,9 @@ code {
     .app-wrapper:has(.app-sidebar:hover) .app-sidebar .sidebar-nav .nav-link > span {
         max-width: 200px;
         opacity: 1;
+    }
+    .app-wrapper:has(.app-sidebar:hover) .app-sidebar .sidebar-nav .nav-link .badge {
+        display: inline-block;
     }
     .app-wrapper:has(.app-sidebar:hover) .app-sidebar .sidebar-section-title {
         display: block;
