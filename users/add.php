@@ -24,6 +24,9 @@ $v = [
     'status'    => 'active',
 ];
 
+// Only a Super Admin assigns module permissions. Defaults to the role defaults.
+$selectedModules = role_default_modules($v['role']);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
 
@@ -36,6 +39,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
     $password     = $_POST['password'] ?? '';
     $confirmPass  = $_POST['confirm_password'] ?? '';
+
+    // Module permissions are only assigned by a Super Admin.
+    $permissions = null;
+    if (has_role('super_admin')) {
+        $posted = (array)($_POST['permissions'] ?? []);
+        $allowed = array_keys(module_list());
+        $selectedModules = array_values(array_intersect($allowed, $posted));
+        $permissions = implode(',', $selectedModules);
+    } else {
+        $selectedModules = role_default_modules($v['role']);
+    }
 
     $errors = [];
 
@@ -69,10 +83,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
         $stmt = db()->prepare(
-            "INSERT INTO users (username, full_name, email, password_hash, role, status)
-             VALUES (?, ?, ?, ?, ?, ?)"
+            "INSERT INTO users (username, full_name, email, password_hash, role, status, permissions)
+             VALUES (?, ?, ?, ?, ?, ?, ?)"
         );
-        $stmt->execute([$v['username'], $v['full_name'], $v['email'] ?: null, $hash, $v['role'], $v['status']]);
+        $stmt->execute([$v['username'], $v['full_name'], $v['email'] ?: null, $hash, $v['role'], $v['status'], $permissions]);
 
         $newId = (int)db()->lastInsertId();
         log_activity('Added user "' . $v['username'] . '" with role ' . $v['role'], 'users', $newId, null, $v);
@@ -138,6 +152,11 @@ require_once __DIR__ . '/../includes/header.php';
                     <input type="password" class="form-control" name="confirm_password" required minlength="6" autocomplete="new-password">
                 </div>
             </div>
+
+            <?php if (has_role('super_admin')): ?>
+                <?php $isSuperAdminAccount = ($v['role'] === 'super_admin'); ?>
+                <?php include __DIR__ . '/_permissions.php'; ?>
+            <?php endif; ?>
 
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Create User</button>
         </form>

@@ -41,6 +41,15 @@ $v = [
     'status'    => $user['status'],
 ];
 
+// Module permissions shown on the form: explicit assignment when present,
+// otherwise the role defaults. Only the Super Admin can edit them.
+$isSuperAdminAccount = ($user['role'] === 'super_admin');
+$selectedModules     = $user['permissions'] === null
+    ? role_default_modules($user['role'])
+    : ($user['permissions'] === ''
+        ? []
+        : array_values(array_filter(array_map('trim', explode(',', (string)$user['permissions'])))));
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
 
@@ -68,6 +77,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'role'      => array_key_exists($_POST['role'] ?? '', $roles) ? $_POST['role'] : $user['role'],
         'status'    => in_array($_POST['status'] ?? '', ['active', 'inactive'], true) ? $_POST['status'] : $user['status'],
     ];
+
+    // Module permissions: only a Super Admin editing a non-Super-Admin account
+    // may change them. For everyone else the existing assignment is kept.
+    $permissions = $user['permissions'];
+    if (has_role('super_admin') && !$isSuperAdminAccount) {
+        $posted = (array)($_POST['permissions'] ?? []);
+        $allowed = array_keys(module_list());
+        $selectedModules = array_values(array_intersect($allowed, $posted));
+        $permissions = implode(',', $selectedModules);
+    } else {
+        $selectedModules = $user['permissions'] === null
+            ? role_default_modules($v['role'])
+            : ($user['permissions'] === ''
+                ? []
+                : array_values(array_filter(array_map('trim', explode(',', (string)$user['permissions'])))));
+    }
 
     $errors = [];
     if ($v['full_name'] === '') {
@@ -98,8 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $photoToStore = $photoFile ?: ($user['profile_photo'] ?? null);
 
-        $stmt = db()->prepare("UPDATE users SET full_name = ?, email = ?, role = ?, status = ?, profile_photo = ? WHERE id = ?");
-        $stmt->execute([$v['full_name'], $v['email'] ?: null, $v['role'], $v['status'], $photoToStore, $id]);
+        $stmt = db()->prepare("UPDATE users SET full_name = ?, email = ?, role = ?, status = ?, profile_photo = ?, permissions = ? WHERE id = ?");
+        $stmt->execute([$v['full_name'], $v['email'] ?: null, $v['role'], $v['status'], $photoToStore, $permissions, $id]);
 
         if ((int)current_user()['id'] === $id) {
             $_SESSION['user']['profile_photo'] = $photoToStore;
@@ -176,6 +201,10 @@ require_once __DIR__ . '/../includes/header.php';
                     </select>
                 </div>
             </div>
+
+            <?php if (has_role('super_admin')): ?>
+                <?php include __DIR__ . '/_permissions.php'; ?>
+            <?php endif; ?>
 
             <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save Changes</button>
         </form>

@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password_hash` VARCHAR(255) NOT NULL,
   `role` ENUM('super_admin','admin','staff') NOT NULL DEFAULT 'staff',
   `status` ENUM('active','inactive') NOT NULL DEFAULT 'active',
+  `permissions` TEXT DEFAULT NULL COMMENT 'Explicit module access (comma separated); NULL inherits the role defaults',
   `profile_photo` VARCHAR(255) DEFAULT NULL,
   `theme` ENUM('light','dark') NOT NULL DEFAULT 'light' COMMENT 'Interface theme (light or dark)',
   `last_login` DATETIME DEFAULT NULL,
@@ -246,8 +247,8 @@ CREATE TABLE IF NOT EXISTS `settings` (
 --   Username : admin
 --   Password : Admin@123
 -- The password below is a bcrypt hash of "Admin@123". Change it after login.
-INSERT INTO `users` (`username`, `full_name`, `email`, `password_hash`, `role`, `status`) VALUES
-('admin', 'System Administrator', 'admin@example.com', '$2y$10$/hqxYV4wOInNsicpYjQTJ.xs7ncDhxmhQmUjnPQByDN1Fbvq.7xhK', 'super_admin', 'active');
+INSERT INTO `users` (`username`, `full_name`, `email`, `password_hash`, `role`, `status`, `permissions`) VALUES
+('admin', 'System Administrator', 'admin@example.com', '$2y$10$/hqxYV4wOInNsicpYjQTJ.xs7ncDhxmhQmUjnPQByDN1Fbvq.7xhK', 'super_admin', 'active', NULL);
 
 -- Example labs (edit / add more through the Lab Management page)
 INSERT INTO `labs` (`name`, `location`, `description`, `status`) VALUES

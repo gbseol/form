@@ -89,6 +89,11 @@ function has_role($roles)
  * Role/permission matrix. Every privileged action in the application is
  * guarded through this single table, keeping permissions easy to maintain.
  *
+ * Permissions are checked in two steps:
+ *   1. The module the permission belongs to must be accessible to the user
+ *      (explicitly assigned by a Super Admin, or the role default).
+ *   2. The user's role must allow the permission (the matrix below).
+ *
  * @param string $permission
  * @return bool
  */
@@ -132,8 +137,141 @@ function can($permission)
         ];
     }
 
+    $user = current_user();
+    if (!$user) {
+        return false;
+    }
+
+    // The permission belongs to a module that can be switched off per user.
+    $module = permission_module($permission);
+    if ($module !== null && !can_access_module($module)) {
+        return false;
+    }
+
     $roles = $map[$permission] ?? [];
     return has_role($roles);
+}
+
+// -----------------------------------------------------------------------------
+// Per-user module permissions (Super Admin assigns these via the user form)
+// -----------------------------------------------------------------------------
+
+/**
+ * The switchable top-level modules shown to the Super Admin on the user form.
+ *
+ * @return array module key => display label
+ */
+function module_list()
+{
+    return [
+        'dashboard' => 'Dashboard',
+        'computers' => 'Computers',
+        'labs'      => 'Labs',
+        'users'     => 'Users',
+        'reports'   => 'Reports',
+        'issues'    => 'Issues',
+    ];
+}
+
+/**
+ * Modules a role can access by default (used when a user has no explicit
+ * permission assignment yet - i.e. permissions is NULL).
+ *
+ * @param string $role
+ * @return array
+ */
+function role_default_modules($role)
+{
+    $map = [
+        'super_admin' => ['dashboard', 'computers', 'labs', 'users', 'reports', 'issues'],
+        'admin'       => ['dashboard', 'computers', 'labs', 'users', 'reports', 'issues'],
+        'staff'       => ['dashboard', 'computers', 'issues'],
+    ];
+    return $map[$role] ?? ['dashboard'];
+}
+
+/**
+ * Map a fine-grained permission to the module that controls it. Permissions
+ * that are not part of a switchable module (activity logs, settings, ...)
+ * return null and therefore stay role-only.
+ *
+ * @param string $permission
+ * @return string|null
+ */
+function permission_module($permission)
+{
+    $map = [
+        'manage_users'    => 'users',
+        'delete_users'    => 'users',
+        'reset_passwords' => 'users',
+
+        'manage_labs'     => 'labs',
+        'delete_labs'     => 'labs',
+
+        'add_computer'    => 'computers',
+        'edit_computer'   => 'computers',
+        'update_status'   => 'computers',
+        'delete_computer' => 'computers',
+        'view_computer'   => 'computers',
+
+        'view_reports'    => 'reports',
+        'export_reports'  => 'reports',
+
+        'report_issue'    => 'issues',
+        'view_issues'     => 'issues',
+        'manage_issues'   => 'issues',
+    ];
+    return $map[$permission] ?? null;
+}
+
+/**
+ * The modules the current user can access. Uses the explicitly assigned
+ * permissions from the users table when present, otherwise the role defaults.
+ * Super Admin always has every module.
+ *
+ * @return array
+ */
+function user_modules()
+{
+    static $modules = null;
+
+    if ($modules !== null) {
+        return $modules;
+    }
+
+    $user = current_user();
+    if (!$user) {
+        return $modules = [];
+    }
+
+    if ($user['role'] === 'super_admin') {
+        return $modules = array_keys(module_list());
+    }
+
+    $stmt = db()->prepare("SELECT permissions FROM users WHERE id = ?");
+    $stmt->execute([(int)$user['id']]);
+    $perms = $stmt->fetchColumn();
+
+    if ($perms === null) {
+        $modules = role_default_modules($user['role']);
+    } else {
+        $modules = $perms === ''
+            ? []
+            : array_values(array_filter(array_map('trim', explode(',', (string)$perms))));
+    }
+
+    return $modules;
+}
+
+/**
+ * True when the current user can access the given module.
+ *
+ * @param string $module
+ * @return bool
+ */
+function can_access_module($module)
+{
+    return in_array($module, user_modules(), true);
 }
 
 /**

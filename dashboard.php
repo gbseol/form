@@ -10,6 +10,29 @@
 
 $page_title = 'Dashboard';
 
+require_once __DIR__ . '/includes/auth.php';
+
+// The Dashboard is a switchable module. When the current user was not granted
+// it, send them to the first accessible module (or show a "no access" notice
+// when every module is switched off).
+$myModules = user_modules();
+if ($myModules === []) {
+    $page_title = 'No Access';
+} elseif (!in_array('dashboard', $myModules, true)) {
+    $landing = [
+        'computers' => 'computers/index.php',
+        'labs'      => 'labs/index.php',
+        'users'     => 'users/index.php',
+        'reports'   => 'reports/index.php',
+        'issues'    => 'issues/index.php',
+    ];
+    foreach ($myModules as $m) {
+        if (isset($landing[$m])) {
+            redirect($landing[$m]);
+        }
+    }
+}
+
 require_once __DIR__ . '/includes/header.php';
 
 // -----------------------------------------------------------------------------
@@ -55,6 +78,20 @@ if ($showRecentActivities) {
     $recentActivities = $recentStmt->fetchAll();
 }
 ?>
+
+<?php if ($myModules === []): ?>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-shield-lock fs-1 text-secondary"></i>
+                <h5 class="mt-3 mb-1">No Access</h5>
+                <p class="text-muted mb-0">Your account has not been assigned any modules yet. Please contact your administrator.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<?php else: ?>
 
 <div class="row g-3 mb-4<?php echo $isStaff ? ' justify-content-center' : ''; ?>">
     <?php if (!$isStaff): ?>
@@ -296,6 +333,8 @@ if ($showRecentActivities) {
         </div>
     </div>
 </div>
+<?php endif; ?>
+
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

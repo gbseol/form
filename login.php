@@ -27,6 +27,15 @@ $error       = '';
 $lockMessage = '';
 $username    = trim($_POST['username'] ?? '');
 
+// Show the default login hint only while the admin account still uses the
+// default password. As soon as it is changed, the hint disappears.
+$defaultHint = false;
+$adminStmt = db()->query("SELECT password_hash FROM users WHERE role = 'super_admin' AND status = 'active' ORDER BY id LIMIT 1");
+$adminRow  = $adminStmt->fetch();
+if ($adminRow && password_verify('Admin@123', $adminRow['password_hash'])) {
+    $defaultHint = true;
+}
+
 // Simple brute-force lockout: 5 attempts -> locked for 15 minutes.
 $attempts   = $_SESSION['login_attempts'] ?? 0;
 $lockedUntil = $_SESSION['login_locked_until'] ?? 0;
@@ -193,11 +202,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </form>
 
+            <?php if ($defaultHint): ?>
             <hr class="my-4">
             <p class="text-center text-muted small mb-0">
                 Default login &mdash; Username: <code>admin</code> &nbsp; Password: <code>Admin@123</code><br>
                 <span class="text-danger">Please change the password after your first login.</span>
             </p>
+            <?php endif; ?>
         </div>
     </div>
 </div>

@@ -905,7 +905,7 @@ code {
 
     /* Hide text labels when collapsed */
     .app-sidebar .sidebar-brand-text,
-    .app-sidebar .sidebar-nav .nav-link > span {
+    .app-sidebar .sidebar-nav .nav-link > span:not(.badge) {
         max-width: 0;
         opacity: 0;
         overflow: hidden;
@@ -913,7 +913,18 @@ code {
         transition: max-width .34s cubic-bezier(.22, 1, .36, 1), opacity .22s ease;
     }
     .app-sidebar .sidebar-nav .nav-link .badge {
-        display: none;
+        position: absolute;
+        top: calc(50% - 10px);
+        left: calc(50% + 10px);
+        width: 8px;
+        height: 8px;
+        padding: 0;
+        border-radius: 50%;
+        font-size: 0;
+        line-height: 0;
+        overflow: hidden;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 0 2px rgba(10, 12, 20, .45);
     }
     .app-sidebar .sidebar-section-title {
         display: none;
@@ -940,12 +951,23 @@ code {
         box-shadow: inset 3px 0 0 var(--sidebar-accent, #2948c2), 0 6px 16px -6px rgba(0,0,0,.4);
     }
     .app-wrapper:has(.app-sidebar:hover) .app-sidebar .sidebar-brand-text,
-    .app-wrapper:has(.app-sidebar:hover) .app-sidebar .sidebar-nav .nav-link > span {
+    .app-wrapper:has(.app-sidebar:hover) .app-sidebar .sidebar-nav .nav-link > span:not(.badge) {
         max-width: 200px;
         opacity: 1;
     }
     .app-wrapper:has(.app-sidebar:hover) .app-sidebar .sidebar-nav .nav-link .badge {
+        position: static;
         display: inline-block;
+        margin-left: auto;
+        width: auto;
+        height: auto;
+        padding: var(--bs-badge-padding-y, .35em) var(--bs-badge-padding-x, .65em);
+        border-radius: var(--bs-badge-border-radius, var(--bs-border-radius-pill));
+        font-size: var(--bs-badge-font-size, .75em);
+        line-height: 1;
+        overflow: visible;
+        transform: none;
+        box-shadow: none;
     }
     .app-wrapper:has(.app-sidebar:hover) .app-sidebar .sidebar-section-title {
         display: block;

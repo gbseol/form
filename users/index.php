@@ -58,13 +58,14 @@ require_once __DIR__ . '/../includes/header.php';
                     <th>Email</th>
                     <th>Role</th>
                     <th>Status</th>
+                    <th>Access</th>
                     <th>Last Login</th>
                     <th class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (count($users) === 0): ?>
-                    <tr><td colspan="7" class="text-center text-muted py-4">No users found.</td></tr>
+                    <tr><td colspan="8" class="text-center text-muted py-4">No users found.</td></tr>
                 <?php endif; ?>
                 <?php foreach ($users as $user): ?>
                 <tr>
@@ -90,6 +91,28 @@ require_once __DIR__ . '/../includes/header.php';
                         <span class="badge bg-<?php echo $user['status'] === 'active' ? 'success' : 'secondary'; ?>">
                             <?php echo e(ucfirst($user['status'])); ?>
                         </span>
+                    </td>
+                    <td>
+                        <?php if ($user['role'] === 'super_admin'): ?>
+                            <span class="badge text-bg-primary">All modules</span>
+                        <?php else: ?>
+                            <?php
+                            $mods = $user['permissions'] === null
+                                ? role_default_modules($user['role'])
+                                : ($user['permissions'] === ''
+                                    ? []
+                                    : array_values(array_filter(array_map('trim', explode(',', (string)$user['permissions'])))));
+                            $labels = module_list();
+                            $names  = array_map(fn($m) => $labels[$m] ?? $m, $mods);
+                            ?>
+                            <?php if ($names === []): ?>
+                                <span class="text-muted small">None</span>
+                            <?php else: ?>
+                                <?php foreach ($names as $n): ?>
+                                    <span class="badge bg-secondary-subtle text-secondary fw-normal"><?php echo e($n); ?></span>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </td>
                     <td class="small"><?php echo $user['last_login'] ? e($user['last_login']) : '<span class="text-muted">Never</span>'; ?></td>
                     <td class="text-end text-nowrap">

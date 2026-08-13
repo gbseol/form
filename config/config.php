@@ -46,4 +46,4 @@ date_default_timezone_set('UTC');
 define('MAX_UPLOAD_SIZE', 5242880);
 
 // Version string appended to assets so browsers refresh them after updates.
-define('APP_VERSION', '1.5.7');
+define('APP_VERSION', '1.6.0');

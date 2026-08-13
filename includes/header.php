@@ -114,11 +114,13 @@ function nav_active($dir, $script = '')
         </div>
 
         <nav class="sidebar-nav">
+            <?php if (can_access_module('dashboard')): ?>
             <a href="<?php echo base_url('dashboard.php'); ?>" class="nav-link <?php echo ($current_script === 'dashboard.php') ? 'active' : ''; ?>">
                 <i class="bi bi-speedometer2"></i><span>Dashboard</span>
             </a>
+            <?php endif; ?>
 
-            <?php if (!has_role('staff')): ?>
+            <?php if (can_access_module('computers')): ?>
             <a href="<?php echo base_url('computers/index.php'); ?>" class="nav-link <?php echo nav_active('computers'); ?>">
                 <i class="bi bi-pc-display"></i><span>Computers</span>
             </a>

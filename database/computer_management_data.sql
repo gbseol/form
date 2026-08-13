@@ -380,9 +380,9 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-(1,'admin','System Administrator','admin@example.com','$2y$10$/hqxYV4wOInNsicpYjQTJ.xs7ncDhxmhQmUjnPQByDN1Fbvq.7xhK','super_admin','active',NULL,'light','2026-08-09 11:12:49','2026-08-09 09:42:18','2026-08-09 11:12:49'),
-(2,'ram','Ram singh','admin@example.com','$2y$10$E0.yfQEkdMCKf9wesnQIyODMM7mao.nAy/7Mq7cjc9s1aWS/tCmMW','staff','active','u2_20260809094837_eaf44d72.gif','light','2026-08-09 09:47:16','2026-08-09 09:45:53','2026-08-09 09:48:37'),
-(3,'pwtest','PW Test','pwtest@test.local','$2y$10$.GYdQpCCgcrzX0Iam6sOA.KWz1/0fRz6BT7dz.W1cIB4yzm3CpdIS','staff','active',NULL,'light','2026-08-09 11:13:00','2026-08-09 10:06:22','2026-08-09 11:13:00');
+(1,'admin','System Administrator','admin@example.com','$2y$10$/hqxYV4wOInNsicpYjQTJ.xs7ncDhxmhQmUjnPQByDN1Fbvq.7xhK','super_admin','active',NULL,NULL,'light','2026-08-09 11:12:49','2026-08-09 09:42:18','2026-08-09 11:12:49'),
+(2,'ram','Ram singh','admin@example.com','$2y$10$E0.yfQEkdMCKf9wesnQIyODMM7mao.nAy/7Mq7cjc9s1aWS/tCmMW','staff','active',NULL,'u2_20260809094837_eaf44d72.gif','light','2026-08-09 09:47:16','2026-08-09 09:45:53','2026-08-09 09:48:37'),
+(3,'pwtest','PW Test','pwtest@test.local','$2y$10$.GYdQpCCgcrzX0Iam6sOA.KWz1/0fRz6BT7dz.W1cIB4yzm3CpdIS','staff','active',NULL,NULL,'light','2026-08-09 11:13:00','2026-08-09 10:06:22','2026-08-09 11:13:00');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
