@@ -1,0 +1,6 @@
+uploads/computers/*
+!uploads/computers/index.html
+uploads/logos/*
+!uploads/logos/index.html
+uploads/profiles/*
+!uploads/profiles/index.html

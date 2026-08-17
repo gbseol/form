@@ -23,6 +23,7 @@ TABLE OF CONTENTS
   9. Security notes
   10. Troubleshooting
   11. License
+  12. Local development (Linux / XAMPP)
 
 --------------------------------------------------------------------------------
 1. REQUIREMENTS
@@ -31,6 +32,18 @@ TABLE OF CONTENTS
   - MySQL 5.7 / 8.0 (provided by InfinityFree)
   - A web browser (Chrome, Firefox, Edge, Safari)
   - No terminal / SSH / Composer / Node.js needed at all
+
+  REQUIRED PHP EXTENSIONS
+    - pdo_mysql (database)
+    - gd         (image handling / chart images)
+    - mbstring   (string handling)
+    - xml        (XML parsing)
+    - fileinfo   (upload MIME validation)
+    - zip        (Excel .xlsx export - WITHOUT it the Excel export fails
+                  with "Class ZipArchive not found")
+
+  On Debian/Ubuntu install them all with:
+    sudo apt-get install -y php-cli php-mysql php-gd php-mbstring php-xml php-zip
 
 --------------------------------------------------------------------------------
 2. FILE / FOLDER STRUCTURE
@@ -272,6 +285,21 @@ That is it. The application is fully functional.
 10. TROUBLESHOOTING
 --------------------------------------------------------------------------------
 
+  "Class ZipArchive not found" (Excel export fails)
+    -> The PHP zip extension is not installed. On Debian/Ubuntu run:
+         sudo apt-get install -y php-zip
+       then restart the web server / PHP service. See section 12 for the full
+       list of required extensions.
+
+  "Unknown column 'permissions' in 'SET'" (profile photo upload or
+   user edit fails)
+    -> The database was restored from an OLD dump
+       (database/computer_management_backup_20260809_174643.sql) whose users
+       table lacks the `permissions` column that the current code uses.
+       Fix it once with:
+         mysql computer_management -e "ALTER TABLE users ADD COLUMN permissions TEXT NULL AFTER status;"
+       Fresh installs from database/database.sql already include the column.
+
   "Database connection failed"
     -> config/config.php contains wrong DB_HOST / DB_NAME / DB_USER / DB_PASS.
        Double check the values in the InfinityFree control panel. The host is
@@ -301,3 +329,62 @@ That is it. The application is fully functional.
 --------------------------------------------------------------------------------
   Free to use for any organisation or school. Modify and distribute freely.
   Provided as-is without warranty.
+
+-------------------------------------------------------------------------------
+12. LOCAL DEVELOPMENT (RUNNING ON YOUR OWN MACHINE)
+-------------------------------------------------------------------------------
+  Everything you need to run this system locally for previewing and testing.
+  Verified on Debian/Ubuntu Linux with MariaDB and the PHP built-in server;
+  the same steps apply to XAMPP/WAMP on Windows or macOS.
+
+  STEP 1 - Install PHP (with all required extensions) and MariaDB/MySQL
+    Debian / Ubuntu:
+      sudo apt-get update
+      sudo apt-get install -y php-cli php-mysql php-gd php-mbstring php-xml php-zip mariadb-server
+    XAMPP: PHP, MariaDB and every required extension are already bundled.
+    Do NOT skip php-zip - the Excel (.xlsx) export requires it.
+
+  STEP 2 - Start the database server
+    Linux:
+      sudo service mariadb start
+    Windows / macOS (XAMPP):
+      Start "Apache" and "MySQL" from the XAMPP control panel.
+
+  STEP 3 - Create the database, the user and import the schema
+    mysql -u root -e "CREATE DATABASE IF NOT EXISTS computer_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CREATE USER IF NOT EXISTS 'cms_user'@'localhost' IDENTIFIED BY 'cms_pass';
+    CREATE USER IF NOT EXISTS 'cms_user'@'127.0.0.1' IDENTIFIED BY 'cms_pass';
+    GRANT ALL PRIVILEGES ON computer_management.* TO 'cms_user'@'localhost';
+    GRANT ALL PRIVILEGES ON computer_management.* TO 'cms_user'@'127.0.0.1';
+    FLUSH PRIVILEGES;"
+    mysql computer_management < database/database.sql
+
+    These credentials already match config/config.php (DB_HOST=127.0.0.1,
+    DB_NAME=computer_management, DB_USER=cms_user, DB_PASS=cms_pass).
+    Edit config/config.php if you use different ones.
+
+  STEP 4 - Start the PHP development server
+    cd /path/to/this/project
+    php -S 0.0.0.0:8000
+
+  STEP 5 - Open the app
+    http://localhost:8000  and log in with  admin / Admin@123
+    Change the default password immediately after your first login
+    (Settings -> Change Password).
+
+  IMPORTANT - WHEN RESTORING THE OLD BACKUP FILE
+    database/computer_management_backup_20260809_174643.sql comes from an
+    older database whose `users` table has NO `permissions` column. The current
+    code uses that column, so after restoring that dump you MUST add it:
+
+      mysql computer_management -e "ALTER TABLE users ADD COLUMN permissions TEXT NULL AFTER status;"
+
+    If you skip this, editing a user or uploading a profile photo fails with
+    "Unknown column 'permissions' in 'SET'". Fresh installs from
+    database/database.sql already include the column and need no fix.
+
+  TIP - Fresh demo data
+    database/computer_management_data.sql contains ready-made computers, labs
+    and users so the dashboard is not empty. Import it after the schema if you
+    want demo content. Other files in the database/ folder are full backups
+    created from the Settings -> Backup page.
